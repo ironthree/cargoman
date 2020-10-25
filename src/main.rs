@@ -104,6 +104,8 @@ fn normalize_targets(manifest: &mut Manifest) -> Result<(), String> {
                 }
             }
         }
+
+        manifest.target = None;
     }
 
     Ok(())
