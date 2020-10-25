@@ -13,16 +13,14 @@ pub struct Manifest {
     profile: Option<toml::Value>,
     lib: Option<toml::Value>,
     bin: Option<toml::Value>,
-    #[serde(default)]
-    pub dependencies: Dependencies,
-    #[serde(default)]
-    pub dev_dependencies: Dependencies,
-    #[serde(default)]
-    pub build_dependencies: Dependencies,
-    #[serde(default)]
-    pub features: IndexMap<String, Vec<String>>,
-    #[serde(default)]
-    pub target: IndexMap<String, Target>,
+    example: Option<toml::Value>,
+    test: Option<toml::Value>,
+    bench: Option<toml::Value>,
+    pub dependencies: Option<Dependencies>,
+    pub dev_dependencies: Option<Dependencies>,
+    pub build_dependencies: Option<Dependencies>,
+    pub features: Option<IndexMap<String, Vec<String>>>,
+    pub target: Option<IndexMap<String, Target>>,
     badges: Option<toml::Value>,
     #[serde(flatten)]
     remainder: IndexMap<String, toml::Value>,
@@ -31,12 +29,9 @@ pub struct Manifest {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Target {
-    #[serde(default)]
-    pub dependencies: Dependencies,
-    #[serde(default)]
-    pub dev_dependencies: Dependencies,
-    #[serde(default)]
-    pub build_dependencies: Dependencies,
+    pub dependencies: Option<Dependencies>,
+    pub dev_dependencies: Option<Dependencies>,
+    pub build_dependencies: Option<Dependencies>,
     #[serde(flatten)]
     remainder: IndexMap<String, toml::Value>,
 }

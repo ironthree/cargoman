@@ -1,6 +1,7 @@
 use std::fs;
 use std::io::Write;
 
+use indexmap::IndexMap;
 use structopt::StructOpt;
 
 mod eval;
@@ -63,16 +64,44 @@ fn write_manifest(path: &str, manifest: &Manifest, preamble: &str) -> Result<(),
 }
 
 fn normalize_targets(manifest: &mut Manifest) -> Result<(), String> {
-    for (key, mut target) in manifest.target.drain(..) {
-        if is_linux_target(&key)? {
-            for (key, dep) in target.dependencies.drain(..) {
-                manifest.dependencies.insert(key, dep);
-            }
-            for (key, dep) in target.dev_dependencies.drain(..) {
-                manifest.dev_dependencies.insert(key, dep);
-            }
-            for (key, dep) in target.build_dependencies.drain(..) {
-                manifest.build_dependencies.insert(key, dep);
+    if let Some(ref mut target) = manifest.target {
+        for (key, target) in target.drain(..) {
+            if is_linux_target(&key)? {
+                if let Some(mut dependencies) = target.dependencies {
+                    for (key, dep) in dependencies.drain(..) {
+                        if let Some(ref mut dependencies) = manifest.dependencies {
+                            dependencies.insert(key, dep);
+                        } else {
+                            let mut index: Dependencies = IndexMap::new();
+                            index.insert(key, dep);
+                            manifest.dependencies = Some(index);
+                        }
+                    }
+                }
+
+                if let Some(mut dev_dependencies) = target.dev_dependencies {
+                    for (key, dep) in dev_dependencies.drain(..) {
+                        if let Some(ref mut dev_dependencies) = manifest.dev_dependencies {
+                            dev_dependencies.insert(key, dep);
+                        } else {
+                            let mut index: Dependencies = IndexMap::new();
+                            index.insert(key, dep);
+                            manifest.dev_dependencies = Some(index);
+                        }
+                    }
+                }
+
+                if let Some(mut build_dependencies) = target.build_dependencies {
+                    for (key, dep) in build_dependencies.drain(..) {
+                        if let Some(ref mut build_dependencies) = manifest.build_dependencies {
+                            build_dependencies.insert(key, dep);
+                        } else {
+                            let mut index: Dependencies = IndexMap::new();
+                            index.insert(key, dep);
+                            manifest.build_dependencies = Some(index);
+                        }
+                    }
+                }
             }
         }
     }
@@ -93,9 +122,17 @@ fn set_dependency_version(manifest: &mut Manifest, dependency: &str, version: &s
         });
     };
 
-    doit(&mut manifest.dependencies);
-    doit(&mut manifest.dev_dependencies);
-    doit(&mut manifest.build_dependencies);
+    if let Some(ref mut deps) = manifest.dependencies {
+        doit(deps);
+    }
+
+    if let Some(ref mut deps) = manifest.dev_dependencies {
+        doit(deps);
+    }
+
+    if let Some(ref mut deps) = manifest.build_dependencies {
+        doit(deps);
+    }
 
     Ok(())
 }
