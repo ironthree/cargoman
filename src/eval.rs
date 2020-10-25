@@ -1,7 +1,7 @@
 use parse_cfg::{Cfg, Target};
 
 // https://doc.rust-lang.org/reference/conditional-compilation.html
-pub fn eval_target_cfg(cfg: &Cfg) -> Result<bool, String> {
+fn eval_target_cfg(cfg: &Cfg) -> Result<bool, String> {
     match cfg {
         Cfg::Any(cfgs) => Ok(cfgs.iter().map(|cfg| eval_target_cfg(cfg)).any(|eval| match eval {
             Ok(result) => result,
@@ -92,25 +92,49 @@ mod tests {
     }
 
     #[test]
-    fn cfg_target_os_macos() {
+    fn not_windows() {
+        let string = "cfg(not(windows))";
+        assert_eq!(is_linux_target(string).unwrap(), true);
+    }
+
+    #[test]
+    fn target_os_macos() {
         let string = "cfg(target_os = \"macos\")";
         assert_eq!(is_linux_target(string).unwrap(), false);
     }
 
     #[test]
-    fn cfg_target_arch_wasm32() {
+    fn not_target_os_macos() {
+        let string = "cfg(not(target_os = \"macos\"))";
+        assert_eq!(is_linux_target(string).unwrap(), true);
+    }
+
+    #[test]
+    fn any_target_os_macos_windows() {
+        let string = "cfg(any(target_os = \"macos\", windows))";
+        assert_eq!(is_linux_target(string).unwrap(), false);
+    }
+
+    #[test]
+    fn target_arch_wasm32() {
         let string = "cfg(target_arch = \"wasm32\")";
         assert_eq!(is_linux_target(string).unwrap(), false);
     }
 
     #[test]
-    fn cfg_not_target_arch_wasm32() {
+    fn not_target_arch_wasm32() {
         let string = "cfg(not(target_arch = \"wasm32\"))";
         assert_eq!(is_linux_target(string).unwrap(), true);
     }
 
     #[test]
-    fn cfg_all_target_arch_wasm32_not_target_os_emscripten() {
+    fn not_any_target_os_windows_target_os_macos() {
+        let string = "cfg(not(any(target_os=\"windows\", target_os=\"macos\")))";
+        assert_eq!(is_linux_target(string).unwrap(), true);
+    }
+
+    #[test]
+    fn all_target_arch_wasm32_not_target_os_emscripten() {
         let string = "cfg(all(target_arch = \"wasm32\", not(target_os = \"emscripten\")))";
         assert_eq!(is_linux_target(string).unwrap(), false);
     }
