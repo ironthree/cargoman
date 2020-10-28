@@ -1,27 +1,26 @@
 [package]
 name = "cargoman"
-description = "command line tool to manipulate Cargo.toml files"
+description = "small command line tool to programmatically manipulate Cargo.toml files"
 license = "MIT OR Apache-2.0"
 
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
-# do not publish yet
-publish = false
 
 authors = ["Fabio Valentini <decathorpe@gmail.com>"]
 readme = "README.md"
+exclude = ["/.github/"]
 categories = ["command-line-utilities", "development-tools"]
 keywords = ["cargo", "toml", "manipulate", "cli"]
-repository = "https://pagure.io/ironthree/cargoman"
+repository = "https://github.com/ironthree/cargoman"
 
 [dependencies]
-env_logger = "0.8.1"
+env_logger = "^0.8.1"
 indexmap = { version = "1.6.0", features = ["serde-1"] }
-log = "0.4.11"
-parse_cfg = "2.0.0"
-serde = { version = "1.0.117", features = ["derive"] }
+log = "^0.4.11"
+parse_cfg = "^2.0.0"
+serde = { version = "^1.0.117", features = ["derive"] }
 structopt = "^0.3.18"
-toml = { version = "0.5.7", features = ["preserve_order"] }
+toml = { version = "^0.5.7", features = ["preserve_order"] }
 
 [profile.release]
 codegen-units = 1

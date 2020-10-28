@@ -9,3 +9,7 @@ RPM packaging:
 target-independent or by removing them)
 - override dependency versions
 
+The goal of this project is to eventually make it unnecessary to manually
+patch `Cargo.toml` files for RPM packages of Rust crates in Fedora and
+to automate these modifications as part of the build process instead.
+
