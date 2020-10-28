@@ -63,7 +63,8 @@ fn write_manifest(path: &str, manifest: &Manifest, preamble: &str) -> Result<(),
     Ok(())
 }
 
-fn normalize_targets(manifest: &mut Manifest) -> Result<(), String> {
+// returned boolean indicates whether the manifest was changed or not
+fn normalize_targets(manifest: &mut Manifest) -> Result<bool, String> {
     if let Some(ref mut target) = manifest.target {
         for (key, target) in target.drain(..) {
             if is_linux_target(&key)? {
@@ -106,9 +107,11 @@ fn normalize_targets(manifest: &mut Manifest) -> Result<(), String> {
         }
 
         manifest.target = None;
-    }
 
-    Ok(())
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
 
 fn set_dependency_version(manifest: &mut Manifest, dependency: &str, version: &str) -> Result<(), String> {
@@ -147,8 +150,13 @@ fn main() -> Result<(), String> {
     let result: Result<(), String> = match arguments {
         Arguments::NormalizeTargets { ref path } => {
             let (mut manifest, preamble) = read_manifest(path)?;
-            normalize_targets(&mut manifest)?;
-            write_manifest(path, &manifest, &preamble)?;
+
+            // only write back to disk if there actually are changes
+            let rewritten = normalize_targets(&mut manifest)?;
+            if rewritten {
+                write_manifest(path, &manifest, &preamble)?;
+            }
+
             Ok(())
         },
         Arguments::SetDependencyVersion {

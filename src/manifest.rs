@@ -6,6 +6,11 @@ use indexmap::IndexMap;
 
 pub type Dependencies = IndexMap<String, Dependency>;
 
+// Non-public struct fields are present to preserve the order
+// of sections and values in rewritten Cargo.toml files.
+// The goal is to make only minimal changes to Cargo.toml files
+// that were normalized before uploading them to crates.io.
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Manifest {
