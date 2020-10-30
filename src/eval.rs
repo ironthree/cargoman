@@ -6,14 +6,14 @@ fn eval_target_cfg(cfg: &Cfg) -> Result<bool, String> {
         Cfg::Any(cfgs) => Ok(cfgs.iter().map(|cfg| eval_target_cfg(cfg)).any(|eval| match eval {
             Ok(result) => result,
             Err(error) => {
-                log::error!("{}", error);
+                eprintln!("{}", error);
                 false
             },
         })),
         Cfg::All(cfgs) => Ok(cfgs.iter().map(|cfg| eval_target_cfg(cfg)).all(|eval| match eval {
             Ok(result) => result,
             Err(error) => {
-                log::error!("{}", error);
+                eprintln!("{}", error);
                 false
             },
         })),

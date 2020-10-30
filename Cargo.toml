@@ -14,9 +14,7 @@ keywords = ["cargo", "toml", "manipulate", "cli"]
 repository = "https://github.com/ironthree/cargoman"
 
 [dependencies]
-env_logger = "^0.8.1"
 indexmap = { version = "1.6.0", features = ["serde-1"] }
-log = "^0.4.11"
 parse_cfg = "^2.0.0"
 serde = { version = "^1.0.117", features = ["derive"] }
 structopt = { version = "^0.3.18", features = ["wrap_help"] }

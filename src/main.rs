@@ -67,8 +67,6 @@ fn write_manifest(path: &str, manifest: &Manifest, preamble: &str) -> Result<(),
 }
 
 fn main() -> Result<(), String> {
-    env_logger::init();
-
     let arguments: Arguments = Arguments::from_args();
 
     let result: Result<(), String> = match arguments {
