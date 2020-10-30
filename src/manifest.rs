@@ -175,6 +175,18 @@ impl Manifest {
 
         for dropped in &removed {
             if optionals.contains(dropped) {
+                // only remove dropped optional dependencies if no remaining feature depends on them
+                let mut dep_of_feature = false;
+                for (_name, deps) in features.iter() {
+                    if deps.contains(dropped) {
+                        dep_of_feature = true;
+                    }
+                }
+
+                if dep_of_feature {
+                    continue;
+                }
+
                 if let Some(ref mut deps) = self.dependencies {
                     deps.shift_remove(dropped);
                 }
