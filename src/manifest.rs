@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 
 use crate::eval::is_linux_target;
 
@@ -118,6 +117,7 @@ impl Manifest {
         let doit = |deps: &mut Dependencies| {
             deps.entry(dependency.to_string()).and_modify(|value| match value {
                 Dependency::Version(ref mut s) => {
+                    // modify string in-place
                     s.clear();
                     s.push_str(version);
                 },
@@ -137,6 +137,48 @@ impl Manifest {
 
         if let Some(ref mut deps) = self.build_dependencies {
             doit(deps);
+        }
+
+        Ok(())
+    }
+
+    pub fn remove_feature(&mut self, feature: &str) -> Result<(), String> {
+        let features = match self.features {
+            Some(ref mut features) => features,
+            None => return Err(String::from("No features present in Cargo.toml.")),
+        };
+
+        // keep track of removed features and optional dependencies
+        let mut removed: Vec<String> = Vec::new();
+
+        match features.shift_remove(feature) {
+            Some(values) => removed.extend(values),
+            None => return Err(format!("Feature not present in Cargo.toml: {}", feature)),
+        }
+
+        // remove removed feature from other feature's dependencies
+        for (_name, dependencies) in features.iter_mut() {
+            dependencies.retain(|d| d != feature);
+        }
+
+        // remove optional dependencies that are no longer necessary
+        let mut optionals: Vec<String> = Vec::new();
+        if let Some(ref deps) = self.dependencies {
+            for (name, details) in deps {
+                if let Dependency::Details(details) = details {
+                    if details.optional.unwrap_or(false) {
+                        optionals.push(name.to_string());
+                    }
+                }
+            }
+        }
+
+        for dropped in &removed {
+            if optionals.contains(dropped) {
+                if let Some(ref mut deps) = self.dependencies {
+                    deps.shift_remove(dropped);
+                }
+            }
         }
 
         Ok(())

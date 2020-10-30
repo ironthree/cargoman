@@ -19,7 +19,7 @@ indexmap = { version = "1.6.0", features = ["serde-1"] }
 log = "^0.4.11"
 parse_cfg = "^2.0.0"
 serde = { version = "^1.0.117", features = ["derive"] }
-structopt = "^0.3.18"
+structopt = { version = "^0.3.18", features = ["wrap_help"] }
 toml = { version = "^0.5.7", features = ["preserve_order"] }
 
 [profile.release]

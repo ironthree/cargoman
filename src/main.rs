@@ -14,11 +14,21 @@ use manifest::Manifest;
 enum Arguments {
     /// normalize targets (removes dependencies for foreign targets)
     NormalizeTargets {
+        #[structopt(long, short, default_value = "Cargo.toml")]
         /// path to Cargo.toml file
         path: String,
     },
+    /// remove features (and resulting leaf optional dependencies)
+    RemoveFeatures {
+        #[structopt(long, short, default_value = "Cargo.toml")]
+        /// path to Cargo.toml file
+        path: String,
+        /// names of feature(s) to remove
+        features: Vec<String>,
+    },
     /// override the version of a specific dependency
     SetDependencyVersion {
+        #[structopt(long, short, default_value = "Cargo.toml")]
         /// path to Cargo.toml file
         path: String,
         /// name of the crate
@@ -51,17 +61,7 @@ fn write_manifest(path: &str, manifest: &Manifest, preamble: &str) -> Result<(),
 
     let mut file = fs::File::create(path).map_err(|err| format!("Failed to open Cargo.toml: {}", err))?;
 
-    write!(
-        file,
-        "\
-# This file has been changed by cargoman.
-#
-{}
-
-{}",
-        preamble, string
-    )
-    .map_err(|err| format!("Failed to write file: {}", err))?;
+    write!(file, "{}\n\n{}", preamble, string).map_err(|err| format!("Failed to write file: {}", err))?;
 
     Ok(())
 }
@@ -81,6 +81,14 @@ fn main() -> Result<(), String> {
                 write_manifest(path, &manifest, &preamble)?;
             }
 
+            Ok(())
+        },
+        Arguments::RemoveFeatures { ref path, ref features } => {
+            let (mut manifest, preamble) = read_manifest(path)?;
+            for feature in features {
+                manifest.remove_feature(feature)?;
+            }
+            write_manifest(path, &manifest, &preamble)?;
             Ok(())
         },
         Arguments::SetDependencyVersion {
