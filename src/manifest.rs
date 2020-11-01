@@ -148,12 +148,13 @@ impl Manifest {
             None => return Err(String::from("No features present in Cargo.toml.")),
         };
 
-        // keep track of removed features and optional dependencies
+        // keep track of removed features and optional dependencies that still have to be removed
         let mut removed: Vec<String> = Vec::new();
+        let mut to_remove: Vec<String> = Vec::new();
 
         match features.shift_remove(feature) {
             Some(values) => removed.extend(values),
-            None => return Err(format!("Feature not present in Cargo.toml: {}", feature)),
+            None => to_remove.push(feature.to_string()),
         }
 
         // remove removed feature from other feature's dependencies
@@ -161,7 +162,7 @@ impl Manifest {
             dependencies.retain(|d| d != feature);
         }
 
-        // remove optional dependencies that are no longer necessary
+        // collect optional dependencies
         let mut optionals: Vec<String> = Vec::new();
         if let Some(ref deps) = self.dependencies {
             for (name, details) in deps {
@@ -173,6 +174,21 @@ impl Manifest {
             }
         }
 
+        // remove specified optional dependencies that were not features
+        for to_remove in to_remove {
+            if optionals.contains(&to_remove) {
+                if let Some(ref mut deps) = self.dependencies {
+                    deps.shift_remove(&to_remove);
+                }
+            } else {
+                return Err(format!(
+                    "Feature or optional dependency not present in Cargo.toml: {}",
+                    feature
+                ));
+            }
+        }
+
+        // remove freed optional dependencies if they are no longer depended on by any other feature
         for dropped in &removed {
             if optionals.contains(dropped) {
                 // only remove dropped optional dependencies if no remaining feature depends on them
