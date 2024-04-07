@@ -1,9 +1,9 @@
 [package]
 name = "cargoman"
-description = "small command line tool to programmatically manipulate Cargo.toml files"
+description = "Small command line tool to programmatically manipulate Cargo.toml files"
 license = "MIT OR Apache-2.0"
 
-version = "0.2.2"
+version = "0.2.3"
 edition = "2018"
 
 authors = ["Fabio Valentini <decathorpe@gmail.com>"]
@@ -25,3 +25,5 @@ codegen-units = 1
 lto = true
 opt-level = 3
 
+[badges]
+maintenance = { status = "deprecated" }

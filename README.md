@@ -1,4 +1,11 @@
-# cargoman
+# cargoman (DEPRECATED)
+
+**WARNING**: This project has been superseded by [rust2rpm-helper] and is no
+longer maintained.
+
+[rust2rpm-helper]: https://src.fedoraproject.org/rpms/rust2rpm-helper
+
+---
 
 cargoman provides a basic CLI to manipulate `Cargo.toml` files.
 
